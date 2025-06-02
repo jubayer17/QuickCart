@@ -161,4 +161,12 @@ export const products = [
     price: "$1,999.99",
     imgSrc: assets.asus_laptop_image,
   },
+  {
+    id: 21,
+    name: "AULA Gaming Mouse",
+    description: "RGB Wired, 7 Programmable Buttons, 7200 DPI",
+    rating: 4.3,
+    price: "$29.99",
+    imgSrc: assets.aula_mouse,
+  },
 ];
