@@ -4,6 +4,7 @@ import {
   syncUserCreation,
   syncUserDeletion,
   syncUserUpdation,
+  createUserOrder,
 } from "@/config/inngest";
 
 // Create an API that serves zero functions

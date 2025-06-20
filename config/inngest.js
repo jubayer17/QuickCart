@@ -1,6 +1,8 @@
 import { Inngest } from "inngest";
 import connectdb from "./db";
 import User from "@/models/User";
+import { use } from "react";
+import Order from "@/models/Order";
 
 export const inngest = new Inngest({ id: "quick-cart" });
 
@@ -65,5 +67,33 @@ export const syncUserDeletion = inngest.createFunction(
     } catch (error) {
       console.error("User deletion error:", error);
     }
+  }
+);
+
+//inngest function to create the user order's in the database
+export const createUserOrder = inngest.createFunction(
+  {
+    id: "create-user-order",
+    batchEvents: {
+      maxSize: 25,
+      timeout: "5s",
+    },
+  },
+  {
+    event: "order/created",
+  },
+  async ({ events }) => {
+    const orders = events.map((event) => {
+      return {
+        userId: event.data.userId,
+        items: event.data.items,
+        amount: event.data.amount,
+        address: event.data.address,
+        date: event.data.date,
+      };
+    });
+    await connectdb();
+    await Order.insertMany(orders);
+    return { success: true, processed: orders.length };
   }
 );
