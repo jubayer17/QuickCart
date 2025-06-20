@@ -10,15 +10,29 @@ export async function POST(req) {
     const { userId } = await getAuth(req);
     const { address, items } = await req.json();
 
-    if (!address || items.length === 0) {
+    if (!address || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ success: false, message: "Invalid data" });
     }
 
     let amount = 0;
-    for (const item of items) {
-      const product = await Product.findById(item.product);
-      amount += product.offerPrice * item.quantity;
+
+    // Use Promise.all for better performance when fetching multiple products
+    const products = await Promise.all(
+      items.map((item) => Product.findById(item.product))
+    );
+
+    for (let i = 0; i < items.length; i++) {
+      const product = products[i];
+      if (!product) {
+        return NextResponse.json({
+          success: false,
+          message: `Product not found: ${items[i].product}`,
+        });
+      }
+      amount += product.offerPrice * items[i].quantity;
     }
+
+    const orderAmount = amount + Math.floor(amount * 0.02);
 
     await inngest.send({
       name: "order/created",
@@ -26,24 +40,22 @@ export async function POST(req) {
         userId,
         address,
         items,
-        amount: amount + Math.floor(amount * 0.02),
+        amount: orderAmount,
         date: Date.now(),
       },
     });
 
-    const user = await User.findById(userId);
-    user.cartItems = {};
-    await user.save();
+    await User.findByIdAndUpdate(userId, { cartItems: {} });
 
     return NextResponse.json({
       success: true,
       message: "Order has been placed",
     });
   } catch (err) {
-    console.log(err);
+    console.error("Order POST Error:", err);
     return NextResponse.json({
       success: false,
-      message: err.message,
+      message: err.message || "Something went wrong",
     });
   }
 }
