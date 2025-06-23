@@ -1,9 +1,9 @@
 import { addressDummyData } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import axios from "axios";
-
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { XMarkIcon } from "@heroicons/react/24/outline"; // ✅ New icon
 
 const OrderSummary = () => {
   const {
@@ -18,6 +18,7 @@ const OrderSummary = () => {
   } = useAppContext();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false); // ✅ new state
 
   const [userAddresses, setUserAddresses] = useState([]);
 
@@ -46,7 +47,49 @@ const OrderSummary = () => {
     setIsDropdownOpen(false);
   };
 
-  const createOrder = async () => {};
+  const createOrder = async () => {
+    if (isPlacingOrder) return;
+    setIsPlacingOrder(true); // ✅ start loading
+
+    try {
+      if (!selectedAddress) {
+        toast.error("Please enter a address first");
+        return setIsPlacingOrder(false);
+      }
+
+      let cartItemsArray = Object.keys(cartItems).map((key) => ({
+        product: key,
+        quantity: cartItems[key],
+      }));
+      cartItemsArray = cartItemsArray.filter((item) => item.quantity > 0);
+      if (cartItemsArray.length === 0) {
+        toast.error("Cart is empty");
+        return setIsPlacingOrder(false);
+      }
+
+      const token = await getToken();
+      const { data } = await axios.post(
+        "/api/order/create",
+        {
+          address: selectedAddress._id,
+          items: cartItemsArray,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        setCartItems({});
+        router.push("/my-orders");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsPlacingOrder(false); // ✅ stop loading
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -163,11 +206,19 @@ const OrderSummary = () => {
         </div>
       </div>
 
+      {/* ✅ Enhanced Place Order Button */}
       <button
         onClick={createOrder}
-        className="w-full bg-orange-600 text-white py-3 mt-5 hover:bg-orange-700"
+        disabled={isPlacingOrder}
+        className={`w-full text-white py-3 mt-5 rounded-md relative group transition 
+          ${isPlacingOrder ? "bg-orange-400 opacity-70 cursor-not-allowed" : "bg-orange-600 hover:bg-orange-700"}
+        `}
       >
-        Place Order
+        {isPlacingOrder ? "Placing Order..." : "Place Order"}
+
+        {isPlacingOrder && (
+          <XMarkIcon className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 opacity-70 group-hover:opacity-100" />
+        )}
       </button>
     </div>
   );
