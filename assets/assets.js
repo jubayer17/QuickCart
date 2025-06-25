@@ -47,7 +47,11 @@ import product_details_page_apple_earphone_image3 from "./product_details_page_a
 import product_details_page_apple_earphone_image4 from "./product_details_page_apple_earphone_image4.png";
 import product_details_page_apple_earphone_image5 from "./product_details_page_apple_earphone_image5.png";
 import aula_mouse from "./aulamain.png";
+import iphn from "./iphn.png";
+import aula from "./aulaaaaaaaaaaa.png";
 export const assets = {
+  aula,
+  iphn,
   aula_mouse,
   logo,
   search_icon,

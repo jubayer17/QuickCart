@@ -28,6 +28,23 @@ const HeaderSlider = () => {
       buttonText2: "Learn More",
       imgSrc: assets.header_macbook_image,
     },
+    {
+      id: 4,
+      title: "Innovation Unleashed – iPhone 16 Pro Max is Here for You!",
+      offer: "Limited Time Offer 40% Off",
+      buttonText1: "Buy Now",
+      buttonText2: "Explore Features",
+      imgSrc: assets.iphn,
+    },
+    {
+      id: 5,
+      title:
+        "Precision Redefined – Dominate Every Click with AULA Gaming Mouse!",
+      offer: "Limited Time Offer 40% Off",
+      buttonText1: "Buy Now",
+      buttonText2: "See Specs",
+      imgSrc: assets.aula,
+    },
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -67,7 +84,11 @@ const HeaderSlider = () => {
                 </button>
                 <button className="group flex items-center gap-2 px-6 py-2.5 font-medium">
                   {slide.buttonText2}
-                  <Image className="group-hover:translate-x-1 transition" src={assets.arrow_icon} alt="arrow_icon" />
+                  <Image
+                    className="group-hover:translate-x-1 transition"
+                    src={assets.arrow_icon}
+                    alt="arrow_icon"
+                  />
                 </button>
               </div>
             </div>
