@@ -10,6 +10,9 @@ import ProductList from "@/app/seller/product-list/page";
 
 const Navbar = () => {
   const { isSeller, router, user } = useAppContext();
+  const { getCartCount } = useAppContext();
+  const cartCount = getCartCount();
+
   const { openSignIn } = useClerk();
   return (
     <nav className="flex items-center justify-between px-6 md:px-16 lg:px-32 py-3 border-b border-gray-300 text-gray-700">
@@ -57,31 +60,41 @@ const Navbar = () => {
         )}
       </div>
 
-      <ul className="hidden md:flex items-center gap-4 ">
+      <ul className="hidden md:flex items-center gap-4">
+        {/* Search Icon */}
         <Image className="w-4 h-4" src={assets.search_icon} alt="search icon" />
+
+        {/* Cart Icon with Badge */}
+        <div
+          className="relative cursor-pointer mr-2"
+          onClick={() => router.push("/cart")}
+        >
+          <CartIcon />
+          {cartCount > 0 && (
+            <span className="absolute -top-3 -right-3 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+              {cartCount}
+            </span>
+          )}
+        </div>
+
+        {/* Account/Login Button or User Menu */}
         {user ? (
-          <>
-            <UserButton>
-              <UserButton.MenuItems>
-                <UserButton.Action
-                  label="Cart"
-                  labelIcon={<CartIcon />}
-                  onClick={() => {
-                    router.push("/cart");
-                  }}
-                />
-              </UserButton.MenuItems>
-              <UserButton.MenuItems>
-                <UserButton.Action
-                  label="My Orders"
-                  labelIcon={<BagIcon />}
-                  onClick={() => {
-                    router.push("/my-orders");
-                  }}
-                />
-              </UserButton.MenuItems>
-            </UserButton>
-          </>
+          <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="Cart"
+                labelIcon={<CartIcon />}
+                onClick={() => router.push("/cart")}
+              />
+            </UserButton.MenuItems>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="My Orders"
+                labelIcon={<BagIcon />}
+                onClick={() => router.push("/my-orders")}
+              />
+            </UserButton.MenuItems>
+          </UserButton>
         ) : (
           <button
             onClick={openSignIn}

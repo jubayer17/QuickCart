@@ -4,16 +4,10 @@ import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 
 const ProductCard = ({ product }) => {
-  const { currency, router } = useAppContext();
+  const { currency, router, addToCart } = useAppContext();
 
   return (
-    <div
-      onClick={() => {
-        router.push("/product/" + product._id);
-        scrollTo(0, 0);
-      }}
-      className="flex flex-col items-start gap-0.5 max-w-[200px] w-full cursor-pointer"
-    >
+    <div>
       <div className="cursor-pointer group relative bg-gray-500/10 rounded-lg w-full h-52 flex items-center justify-center">
         <Image
           src={product.image[0]}
@@ -27,9 +21,10 @@ const ProductCard = ({ product }) => {
         </button>
       </div>
 
-      <p className="md:text-base font-medium pt-2 w-full truncate">
+      <p className="md:text-base font-semibold pt-2 w-full truncate text-gray-800">
         {product.name}
       </p>
+
       <p className="w-full text-xs text-gray-500/70 max-sm:hidden truncate">
         {product.description}
       </p>
@@ -49,12 +44,36 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
 
-      <div className="flex items-end justify-between w-full mt-1">
-        <p className="text-base font-medium">
-          {currency}
-          {product.offerPrice}
-        </p>
-        <button className=" max-sm:hidden px-4 py-1.5 text-gray-500 border border-gray-500/20 rounded-full text-xs hover:bg-slate-50 transition">
+      {/* Price Row */}
+      <div className="w-full mt-1">
+        <div className="flex items-center gap-2">
+          <p className="text-base font-medium text-gray-900">
+            {currency}
+            {product.offerPrice}
+          </p>
+
+          <p className="text-sm text-gray-500 line-through">
+            {currency}
+            {product.price}
+          </p>
+        </div>
+      </div>
+
+      {/* Buttons on new line */}
+      <div className="flex gap-2 mt-1 max-sm:hidden">
+        <button
+          onClick={() => addToCart(product._id)}
+          className="px-4 py-1.5 text-gray-500 border border-gray-500/20 rounded-full text-xs hover:bg-slate-50 transition"
+        >
+          Add to Cart
+        </button>
+        <button
+          onClick={() => {
+            addToCart(product._id);
+            router.push("/cart");
+          }}
+          className="px-4 py-1.5 text-white bg-orange-500 border border-orange-500 rounded-full text-xs hover:bg-orange-600 transition"
+        >
           Buy Now
         </button>
       </div>

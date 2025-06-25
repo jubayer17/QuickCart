@@ -21,6 +21,7 @@ export const AppContextProvider = (props) => {
   const { user } = useUser();
   const { getToken } = useAuth();
 
+  const [cartCount, setCartCount] = useState(0);
   const [products, setProducts] = useState([]);
   const [userData, setUserData] = useState(null);
   const [isSeller, setIsSeller] = useState(false);
