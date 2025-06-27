@@ -1,12 +1,14 @@
-import { inngest } from "@/config/inngest";
+import connectdb from "@/config/db";
 import Product from "@/models/Product";
 import User from "@/models/User";
+import Order from "@/models/Order";
 
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
+    await connectdb();
     const { userId } = await getAuth(req);
     const { address, items } = await req.json();
 
@@ -16,7 +18,6 @@ export async function POST(req) {
 
     let amount = 0;
 
-    // Use Promise.all for better performance when fetching multiple products
     const products = await Promise.all(
       items.map((item) => Product.findById(item.product))
     );
@@ -34,15 +35,15 @@ export async function POST(req) {
 
     const orderAmount = amount + Math.floor(amount * 0.02);
 
-    await inngest.send({
-      name: "order/created",
-      data: {
-        userId,
-        address,
-        items,
-        amount: orderAmount,
-        date: Date.now(),
-      },
+    // ✅ Hardcoded paymentType
+    await Order.create({
+      userId,
+      address,
+      items,
+      amount: orderAmount,
+      date: Date.now(),
+      paymentType: "COD", // <-- hardcoded here
+      isPaid: false,
     });
 
     await User.findByIdAndUpdate(userId, { cartItems: {} });

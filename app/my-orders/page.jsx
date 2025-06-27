@@ -98,12 +98,20 @@ const MyOrders = () => {
                   </p>
                   <div>
                     <p className="flex flex-col">
-                      <span>Method : COD</span>
+                      <span>
+                        Method :{" "}
+                        {order.paymentType === "stripe" ? "Stripe" : "COD"}
+                      </span>
                       <span>
                         Date :{" "}
                         {new Date(order.date).toLocaleDateString("en-GB")}
                       </span>
-                      <span>Payment : Pending</span>
+                      <span>
+                        Payment :{" "}
+                        {order.paymentType === "stripe"
+                          ? "Completed"
+                          : "Pending"}
+                      </span>
                     </p>
                   </div>
                 </div>

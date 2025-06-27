@@ -91,6 +91,43 @@ const OrderSummary = () => {
     }
   };
 
+  const createOrderStripe = async () => {
+    try {
+      if (!selectedAddress) {
+        toast.error("Please enter a address first");
+        return setIsPlacingOrder(false);
+      }
+
+      let cartItemsArray = Object.keys(cartItems).map((key) => ({
+        product: key,
+        quantity: cartItems[key],
+      }));
+      cartItemsArray = cartItemsArray.filter((item) => item.quantity > 0);
+      if (cartItemsArray.length === 0) {
+        toast.error("Cart is empty");
+        return setIsPlacingOrder(false);
+      }
+
+      const token = await getToken();
+      const { data } = await axios.post(
+        "/api/order/stripe",
+        {
+          address: selectedAddress._id,
+          items: cartItemsArray,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (data.success) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error);
+      }
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchUserAddresses();
@@ -208,10 +245,14 @@ const OrderSummary = () => {
 
       {/* ✅ Enhanced Place Order Button */}
       <button
-        onClick={createOrder}
+        onClick={createOrderStripe}
         disabled={isPlacingOrder}
         className={`w-full text-white py-3 mt-5 rounded-md relative group transition 
-          ${isPlacingOrder ? "bg-orange-400 opacity-70 cursor-not-allowed" : "bg-orange-600 hover:bg-orange-700"}
+          ${
+            isPlacingOrder
+              ? "bg-orange-400 opacity-70 cursor-not-allowed"
+              : "bg-orange-600 hover:bg-orange-700"
+          }
         `}
       >
         {isPlacingOrder ? "Placing Order..." : "Place Order"}
