@@ -1,9 +1,10 @@
-import { addressDummyData } from "@/assets/assets";
+import { addressDummyData, assets } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { XMarkIcon } from "@heroicons/react/24/outline"; // ✅ New icon
+import Image from "next/image";
 
 const OrderSummary = () => {
   const {
@@ -16,6 +17,8 @@ const OrderSummary = () => {
     cartItems,
     setCartItems,
   } = useAppContext();
+  const [isPlaceOrderClicked, setIsPlaceOrderClicked] = useState(false);
+
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false); // ✅ new state
@@ -135,19 +138,21 @@ const OrderSummary = () => {
   }, [user]);
 
   return (
-    <div className="w-full md:w-96 bg-gray-500/5 p-5">
+    <div className="w-full md:w-96 bg-gray-100 p-6 rounded-lg shadow">
       <h2 className="text-xl md:text-2xl font-medium text-gray-700">
         Order Summary
       </h2>
-      <hr className="border-gray-500/30 my-5" />
+      <hr className="border-gray-400/30 my-5" />
+
       <div className="space-y-6">
+        {/* Address Dropdown */}
         <div>
           <label className="text-base font-medium uppercase text-gray-600 block mb-2">
             Select Address
           </label>
-          <div className="relative inline-block w-full text-sm border">
+          <div className="relative text-sm border rounded">
             <button
-              className="peer w-full text-left px-4 pr-2 py-2 bg-white text-gray-700 focus:outline-none"
+              className="peer w-full text-left px-4 py-2 bg-white text-gray-700 focus:outline-none rounded"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <span>
@@ -156,7 +161,7 @@ const OrderSummary = () => {
                   : "Select Address"}
               </span>
               <svg
-                className={`w-5 h-5 inline float-right transition-transform duration-200 ${
+                className={`w-5 h-5 float-right transition-transform duration-200 ${
                   isDropdownOpen ? "rotate-0" : "-rotate-90"
                 }`}
                 xmlns="http://www.w3.org/2000/svg"
@@ -174,11 +179,11 @@ const OrderSummary = () => {
             </button>
 
             {isDropdownOpen && (
-              <ul className="absolute w-full bg-white border shadow-md mt-1 z-10 py-1.5">
+              <ul className="absolute w-full bg-white border shadow-md mt-1 z-10 py-1.5 max-h-60 overflow-y-auto rounded">
                 {userAddresses.map((address, index) => (
                   <li
                     key={index}
-                    className="px-4 py-2 hover:bg-gray-500/10 cursor-pointer"
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     onClick={() => handleAddressSelect(address)}
                   >
                     {address.fullName}, {address.area}, {address.city},{" "}
@@ -187,7 +192,7 @@ const OrderSummary = () => {
                 ))}
                 <li
                   onClick={() => router.push("/add-address")}
-                  className="px-4 py-2 hover:bg-gray-500/10 cursor-pointer text-center"
+                  className="px-4 py-2 text-center hover:bg-gray-100 cursor-pointer text-orange-600 font-medium"
                 >
                   + Add New Address
                 </li>
@@ -196,6 +201,7 @@ const OrderSummary = () => {
           </div>
         </div>
 
+        {/* Promo Code */}
         <div>
           <label className="text-base font-medium uppercase text-gray-600 block mb-2">
             Promo Code
@@ -204,16 +210,17 @@ const OrderSummary = () => {
             <input
               type="text"
               placeholder="Enter promo code"
-              className="flex-grow w-full outline-none p-2.5 text-gray-600 border"
+              className="w-full p-2.5 border rounded outline-none text-gray-600"
             />
-            <button className="bg-orange-600 text-white px-9 py-2 hover:bg-orange-700">
+            <button className="bg-orange-600 text-white px-9 py-2 rounded hover:bg-orange-700">
               Apply
             </button>
           </div>
         </div>
 
-        <hr className="border-gray-500/30 my-5" />
+        <hr className="border-gray-400/30 my-5" />
 
+        {/* Order Summary */}
         <div className="space-y-4">
           <div className="flex justify-between text-base font-medium">
             <p className="uppercase text-gray-600">Items {getCartCount()}</p>
@@ -243,24 +250,39 @@ const OrderSummary = () => {
         </div>
       </div>
 
-      {/* ✅ Enhanced Place Order Button */}
-      <button
-        onClick={createOrderStripe}
-        disabled={isPlacingOrder}
-        className={`w-full text-white py-3 mt-5 rounded-md relative group transition 
-          ${
-            isPlacingOrder
-              ? "bg-orange-400 opacity-70 cursor-not-allowed"
-              : "bg-orange-600 hover:bg-orange-700"
-          }
-        `}
-      >
-        {isPlacingOrder ? "Placing Order..." : "Place Order"}
-
-        {isPlacingOrder && (
-          <XMarkIcon className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 opacity-70 group-hover:opacity-100" />
-        )}
-      </button>
+      {/* Order Button(s) */}
+      {!isPlaceOrderClicked ? (
+        <button
+          onClick={() => setIsPlaceOrderClicked(true)}
+          className="w-full bg-orange-600 text-white py-3 rounded mt-6 hover:bg-orange-700 transition"
+        >
+          Place Order
+        </button>
+      ) : (
+        <div className="flex gap-4 mt-6">
+          <button
+            onClick={createOrder}
+            className={`w-1/2 text-white py-3 rounded flex justify-center items-center transition ${
+              isPlacingOrder
+                ? "bg-orange-400 opacity-70 cursor-not-allowed"
+                : "bg-orange-600 hover:bg-orange-700"
+            }`}
+            disabled={isPlacingOrder}
+          >
+            {isPlacingOrder ? "Placing..." : "Cash On Delivery"}
+          </button>
+          <button
+            onClick={createOrderStripe}
+            className="w-1/2 bg-white border border-gray-300 hover:border-gray-400 py-3 rounded flex justify-center items-center transition"
+          >
+            <Image
+              className="w-12 h-6 object-contain"
+              src={assets.stripe_logo}
+              alt="Stripe"
+            />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -17,19 +17,19 @@ const Orders = () => {
   const fetchSellerOrders = async () => {
     try {
       const token = await getToken();
-
       const { data } = await axios.get("/api/order/seller-orders", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (data.success) {
-        setOrders(data.orders);
+        setOrders(data.orders.sort((a, b) => b.date - a.date));
+
         setLoading(false);
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Failed to fetch orders");
       }
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || "Something went wrong");
     }
   };
 
@@ -55,6 +55,7 @@ const Orders = () => {
                   key={index}
                   className="flex flex-col md:flex-row gap-5 justify-between p-5 border-t border-gray-300"
                 >
+                  {/* Product Info */}
                   <div className="flex-1 flex gap-5 max-w-80">
                     <Image
                       width={64}
@@ -66,38 +67,67 @@ const Orders = () => {
                     <p className="flex flex-col gap-3">
                       <span className="font-medium">
                         {order.items
-                          .map(
-                            (item) => item.product.name + ` x ${item.quantity}`
+                          ?.map(
+                            (item) =>
+                              `${item.product?.name || "Unknown"} x ${
+                                item.quantity
+                              }`
                           )
-                          .join(", ")}
+                          .join(", ") || "No items"}
                       </span>
-                      <span>Items : {order.items.length}</span>
+                      <span>Items: {order.items?.length || 0}</span>
                     </p>
                   </div>
+
+                  {/* Address Info */}
                   <div>
                     <p>
                       <span className="font-medium">
-                        {order.address.fullName}
+                        {order.address?.fullName || "N/A"}
                       </span>
                       <br />
-                      <span>{order.address.area}</span>
+                      <span>{order.address?.area || ""}</span>
                       <br />
-                      <span>{`${order.address.city}, ${order.address.state}`}</span>
+                      <span>
+                        {order.address?.city || ""},{" "}
+                        {order.address?.state || ""}
+                      </span>
                       <br />
-                      <span>{order.address.phoneNumber}</span>
+                      <span>{order.address?.phoneNumber || ""}</span>
                     </p>
                   </div>
+
+                  {/* Amount */}
                   <p className="font-medium my-auto">
                     {currency}
                     {order.amount}
                   </p>
-                  <div>
-                    <p className="flex flex-col">
-                      <span>Method : COD</span>
-                      <span>
-                        Date : {new Date(order.date).toLocaleDateString()}
+
+                  {/* Method, Date, Payment */}
+                  <div className="min-w-[180px]">
+                    <p className="flex flex-col gap-1 text-sm">
+                      <span className="flex">
+                        <span className="w-20 font-medium">Method:</span>
+                        <span>
+                          {order.paymentType === "Stripe" ? "Stripe" : "COD"}
+                        </span>
                       </span>
-                      <span>Payment : Pending</span>
+                      <span className="flex">
+                        <span className="w-20 font-medium">Date:</span>
+                        <span>
+                          {order.date
+                            ? new Date(order.date).toLocaleDateString("en-GB")
+                            : "N/A"}
+                        </span>
+                      </span>
+                      <span className="flex">
+                        <span className="w-20 font-medium">Payment:</span>
+                        <span>
+                          {order.paymentType === "Stripe"
+                            ? "Completed"
+                            : "Pending"}
+                        </span>
+                      </span>
                     </p>
                   </div>
                 </div>

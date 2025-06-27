@@ -49,7 +49,9 @@ import product_details_page_apple_earphone_image5 from "./product_details_page_a
 import aula_mouse from "./aulamain.png";
 import iphn from "./iphn.png";
 import aula from "./aulaaaaaaaaaaa.png";
+import stripe_logo from "./stripe_logo.svg";
 export const assets = {
+  stripe_logo,
   aula,
   iphn,
   aula_mouse,
